@@ -5,21 +5,22 @@ let selecao = [];
 
 async function carregarDados() {
     try {
-        console.log("Iniciando fetch de data/receitas.json...");
-        const response = await fetch('data/receitas.json');
+        const url = window.location.origin + window.location.pathname.replace('index.html', '') + 'data/receitas.json';
+        console.log("Tentando carregar de:", url);
+        const response = await fetch(url);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
         cardapio = await response.json();
-        console.log("Cardápio carregado:", cardapio);
+        console.log("Cardápio carregado com sucesso, tamanho:", cardapio.length);
         
         renderizarCardapio();
         popularConvidados();
     } catch (e) { 
-        console.error("Erro ao carregar cardápio:", e); 
-        document.getElementById('lista-cardapio').innerHTML = '<p style="color:red">Erro ao carregar cardápio. Verifique o console.</p>';
+        console.error("Erro detalhado ao carregar cardápio:", e); 
+        document.getElementById('lista-cardapio').innerHTML = '<p style="color:red">Erro: ' + e.message + '</p>';
     }
 }
 
