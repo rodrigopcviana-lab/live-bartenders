@@ -25,9 +25,11 @@ function renderizarCardapio() {
     container.innerHTML = '';
     cardapio.forEach((r, i) => {
         const isSelected = selecao.includes(r);
+        // Categoria fictícia para o exemplo, pois o Notion de insumos não mapeia categoria para receita ainda
+        const categoria = "Clássico"; 
         container.innerHTML += `
             <div class="menu-item">
-                <span>${r.Nome} (R$ ${r.Preco.toFixed(2)})</span>
+                <span>${r.Nome} <span class="cat-tag">${categoria}</span></span>
                 <button onclick="toggleCardapio(${i})" style="background-color: ${isSelected ? '#d9534f' : '#444'}">
                     ${isSelected ? 'Remover' : '+'}
                 </button>
