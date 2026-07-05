@@ -3,89 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#d4af37">
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <title>Calculadora v2 | Live Bartenders</title>
+    <title>Calculadora | Live Bartenders</title>
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #e0e0e0;
-            --accent-color: #333;
-            --button-color: #444;
-            --whatsapp-color: #25D366;
+            --bg: #0f0f10;
+            --card: #1a1a1c;
+            --card-2: #232326;
+            --field: #202023;
+            --text: #ececec;
+            --muted: #9a9a9f;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.16);
+            --gold: #d4af37;
+            --gold-2: #f7ef8a;
             --gold-gradient: linear-gradient(135deg, #d4af37, #f7ef8a);
+            --whatsapp: #25D366;
+            --whatsapp-hover: #1fae54;
+            --warning-bg: rgba(212, 175, 55, 0.12);
+            --warning-text: #e8c561;
+            --radius: 14px;
+            --radius-sm: 9px;
         }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-color); padding: 20px; line-height: 1.6; max-width: 900px; margin: 0 auto; }
-        h1, h2, h3 { color: #fff; text-transform: uppercase; letter-spacing: 1px; }
-        .container { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-        .card { background-color: var(--card-bg); border: 1px solid var(--accent-color); padding: 20px; margin-bottom: 20px; border-radius: 12px; transition: transform 0.2s; }
-        
-        /* Premium Quote Card */
-        #orcamento { background: #000; border: 1px solid #d4af37; }
-        #total { font-size: 1.5em; font-weight: bold; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        .menu-item { background-color: #222; border: 1px solid #444; padding: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border-radius: 8px; transition: transform 0.2s; }
-        .menu-item:hover { transform: scale(1.02); }
-        .menu-item button { width: auto; padding: 5px 15px; }
-        
-        input, select { width: 100%; padding: 10px; margin: 5px 0; background-color: #2c2c2c; border: 1px solid var(--accent-color); color: white; border-radius: 6px; }
-        
-        .cat-tag { font-size: 0.7em; padding: 2px 6px; border-radius: 4px; background: #444; margin-left: 10px; }
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.55;
+            margin: 0;
+            padding: 20px 16px 48px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .wrap { max-width: 1040px; margin: 0 auto; }
+
+        /* ---------- Header ---------- */
+        header { margin-bottom: 22px; }
+        .brand {
+            font-size: clamp(1.6rem, 6vw, 2.1rem);
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 0;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sync-info { color: var(--muted); font-size: 0.8rem; margin: 4px 0 0; }
+
+        /* ---------- Layout ---------- */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+        /* impede que itens de grid/flex estourem a largura da viewport (min-width:auto) */
+        .grid > *, .field-row > *, .preset-row > *, .menu-item .name { min-width: 0; }
+        @media (min-width: 860px) {
+            .grid { grid-template-columns: 1.6fr 1fr; align-items: start; }
+            .sidebar { position: sticky; top: 20px; }
+        }
+
+        .stack { display: flex; flex-direction: column; gap: 18px; }
+
+        /* ---------- Cards ---------- */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 20px;
+            border-radius: var(--radius);
+        }
+        .section-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        /* ---------- Form fields ---------- */
+        .field { margin-bottom: 14px; }
+        .field:last-child { margin-bottom: 0; }
+        .field label {
+            display: block;
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        input, select {
+            width: 100%;
+            padding: 11px 12px;
+            background: var(--field);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            appearance: none;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+        }
+        select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239a9a9f' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 34px;
+        }
+        .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        /* ---------- Menu ---------- */
+        .menu-item {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            border-radius: var(--radius-sm);
+            transition: border-color 0.15s, background 0.15s;
+        }
+        .menu-item:last-child { margin-bottom: 0; }
+        .menu-item.selected { border-color: var(--gold); background: rgba(212, 175, 55, 0.06); }
+        .menu-item .name { font-weight: 500; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .menu-item .price { color: var(--muted); font-size: 0.85rem; font-weight: 400; }
+        .icon-btn {
+            width: 36px; height: 36px; flex: 0 0 36px;
+            display: grid; place-items: center;
+            border-radius: 50%;
+            border: 1px solid var(--border-strong);
+            background: transparent;
+            color: var(--text);
+            font-size: 1.2rem; line-height: 1;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+        }
+        .icon-btn:hover { background: rgba(255,255,255,0.06); }
+        .icon-btn:active { transform: scale(0.92); }
+        .icon-btn.remove { border-color: #d9534f; color: #ff6b6b; }
+
+        .tag {
+            font-size: 0.68rem;
+            padding: 2px 7px;
+            border-radius: 20px;
+            background: var(--warning-bg);
+            color: var(--warning-text);
+            white-space: nowrap;
+        }
+
+        /* ---------- Quote (Orçamento) ---------- */
+        .quote-card {
+            background: linear-gradient(180deg, #141414, #0c0c0c);
+            border: 1px solid rgba(212, 175, 55, 0.45);
+        }
+        .quote-hero { margin: 2px 0 16px; }
+        .quote-hero-label {
+            display: block; font-size: 0.8rem; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .quote-total {
+            display: block;
+            font-size: clamp(2rem, 9vw, 2.6rem);
+            font-weight: 800;
+            line-height: 1.1;
+            background: var(--gold-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .quote-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+        .chip {
+            font-size: 0.78rem;
+            color: var(--text);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .quote-lines { border-top: 1px solid var(--border); padding-top: 12px; }
+        .quote-lines .line {
+            display: flex; justify-content: space-between; align-items: baseline;
+            font-size: 0.92rem; padding: 5px 0; color: var(--text);
+        }
+        .quote-lines .line span:first-child { color: var(--muted); }
+        .quote-lines .line.divider { border-top: 1px solid var(--border); margin-top: 6px; padding-top: 11px; }
+        .quote-lines .line.strong { font-weight: 700; }
+        .quote-lines .line.strong span:first-child { color: var(--text); }
+        .quote-lines .line.margin span:last-child { color: var(--gold); font-weight: 700; }
+
+        .alert {
+            margin-top: 14px;
+            font-size: 0.82rem;
+            background: var(--warning-bg);
+            color: var(--warning-text);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+        }
+
+        .chart-wrap { margin-top: 18px; height: 190px; position: relative; }
+
+        /* ---------- Buttons ---------- */
+        .actions { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+        .btn {
+            width: 100%;
+            padding: 13px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 0.98rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s, opacity 0.15s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.985); }
+        .btn-whatsapp {
+            background: var(--whatsapp); color: #062c14;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-whatsapp:hover { background: var(--whatsapp-hover); }
+        .btn-ghost {
+            background: transparent; color: var(--text);
+            border: 1px solid var(--border-strong);
+            font-weight: 500; padding: 11px 16px; width: auto;
+        }
+        .btn-ghost:hover { background: rgba(255,255,255,0.05); }
+        .preset-row { display: flex; gap: 10px; }
+        .preset-row select { flex: 1; }
+
+        .selected-list { list-style: none; margin: 0; padding: 0; }
+        .selected-list li {
+            padding: 8px 0; border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .selected-list li:last-child { border-bottom: none; }
+        .empty-state { color: var(--muted); font-size: 0.88rem; margin: 0; }
     </style>
 </head>
 <body>
+<div class="wrap">
     <header>
-        <h1>Live Bartenders</h1>
-        <p id="sync-info" style="font-size: 0.8em; color: #888;"></p>
+        <h1 class="brand">Live Bartenders</h1>
+        <p id="sync-info" class="sync-info"></p>
     </header>
-    
-    <main class="container">
-        <section class="main-content">
+
+    <main class="grid">
+        <section class="stack">
             <div class="card">
-                <h3>Detalhes do Evento</h3>
-                <label for="convidados">Convidados:</label>
-                <select id="convidados"></select>
-                <input type="number" id="consumoMedio" placeholder="Consumo Médio (drinks/pessoa)" min="0">
-                <input type="number" id="duracao" placeholder="Duração (horas)" value="4" min="0">
-                <label for="localizacao">Bairro (Imperatriz - MA):</label>
-                <select id="localizacao">
-                    <option value="">Selecione um bairro...</option>
-                    <option value="Centro">Centro</option>
-                    <option value="Bacuri">Bacuri</option>
-                    <option value="Jucara">Juçara</option>
-                    <option value="Santa Rita">Santa Rita</option>
-                    <option value="Vila Nova">Vila Nova</option>
-                    <option value="Parque Anhanguera">Parque Anhanguera</option>
-                    <option value="Nova Imperatriz">Nova Imperatriz</option>
-                    <option value="Maranhao Novo">Maranhão Novo</option>
-                </select>
+                <span class="section-label">Detalhes do evento</span>
+                <div class="field">
+                    <label for="convidados">Convidados</label>
+                    <select id="convidados"></select>
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="consumoMedio">Consumo médio <span style="opacity:.7">(drinks/pessoa)</span></label>
+                        <input type="number" id="consumoMedio" placeholder="Ex: 3" min="0" inputmode="numeric">
+                    </div>
+                    <div class="field">
+                        <label for="duracao">Duração <span style="opacity:.7">(horas)</span></label>
+                        <input type="number" id="duracao" value="4" min="0" inputmode="numeric">
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="localizacao">Bairro (Imperatriz - MA)</label>
+                    <select id="localizacao">
+                        <option value="">Selecione um bairro...</option>
+                        <option value="Centro">Centro</option>
+                        <option value="Bacuri">Bacuri</option>
+                        <option value="Jucara">Juçara</option>
+                        <option value="Santa Rita">Santa Rita</option>
+                        <option value="Vila Nova">Vila Nova</option>
+                        <option value="Parque Anhanguera">Parque Anhanguera</option>
+                        <option value="Nova Imperatriz">Nova Imperatriz</option>
+                        <option value="Maranhao Novo">Maranhão Novo</option>
+                    </select>
+                </div>
             </div>
-            
-            <div id="calculadora" class="card">
-                <h2>Cardápio Disponível</h2>
+
+            <div class="card">
+                <span class="section-label">Cardápio disponível</span>
                 <div id="lista-cardapio"></div>
             </div>
         </section>
 
         <aside class="sidebar">
-            <div id="orcamento" class="card">
-                <h3>Resumo do Orçamento</h3>
-                <p id="total">Total: R$ 0.00</p>
-                <pre id="detalhamento" style="font-size: 0.85em; white-space: pre-wrap;"></pre>
-                <button onclick="enviarWhatsApp()" style="background-color: var(--whatsapp-color);">Enviar para WhatsApp</button>
-                <select id="presets" onchange="aplicarPreset(this.value)"></select>
-                <button onclick="salvarPreset()">Salvar Preset</button>
-            </div>
-            <div id="cardapio-selecionado" class="card">
-                <h3>Cardápio do Evento</h3>
-                <ul id="lista-selecionada"></ul>
-            </div>
-            <div class="card">
-                <canvas id="myChart"></canvas>
+            <div class="stack">
+                <div id="orcamento" class="card quote-card">
+                    <span class="section-label">Resumo do orçamento</span>
+                    <div class="quote-hero">
+                        <span class="quote-hero-label">Total a cobrar</span>
+                        <span id="total" class="quote-total">R$ 0,00</span>
+                    </div>
+                    <div class="quote-meta">
+                        <span class="chip" id="chip-drinks">0 drinks</span>
+                        <span class="chip" id="chip-bartenders">0 bartenders</span>
+                    </div>
+                    <div id="detalhamento" class="quote-lines"></div>
+                    <div id="aviso-ficha" class="alert" hidden></div>
+                    <div class="chart-wrap"><canvas id="myChart"></canvas></div>
+                    <div class="actions">
+                        <button class="btn btn-whatsapp" onclick="enviarWhatsApp()">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.7-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.2-.5-2.3-1.4-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6l.5-.5c.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5s-.7-1.6-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.4s1 2.8 1.2 3c.2.2 2 3.1 4.9 4.3 2.9 1.2 2.9.8 3.4.8.5-.1 1.7-.7 1.9-1.3.2-.7.2-1.2.2-1.3-.1-.2-.3-.2-.6-.4z"/><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>
+                            Enviar orçamento
+                        </button>
+                        <div class="preset-row">
+                            <select id="presets" onchange="aplicarPreset(this.value)"></select>
+                            <button class="btn btn-ghost" onclick="salvarPreset()">Salvar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <span class="section-label">Cardápio do evento</span>
+                    <ul id="lista-selecionada" class="selected-list"></ul>
+                </div>
             </div>
         </aside>
     </main>
+</div>
+
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js');
