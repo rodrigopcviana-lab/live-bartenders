@@ -7,11 +7,13 @@ from dotenv import load_dotenv
 from datetime import datetime
 
 # Configuração
-ROOT = Path("/Users/rodrigocoelho62981483511/Desktop/Code 1")
-OUT_DIR = Path("/Users/rodrigocoelho62981483511/Desktop/live-bartenders/data")
+# Caminhos relativos ao próprio repositório (portável / funciona em CI).
+# O .env pode ficar na raiz do repo ou ser apontado por NOTION_ENV.
+ROOT = Path(__file__).resolve().parent
+OUT_DIR = ROOT / "data"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-load_dotenv(ROOT / ".env")
+load_dotenv(os.environ.get("NOTION_ENV", ROOT / ".env"))
 TOKEN = os.environ.get("NOTION_TOKEN")
 HEADERS = {
     "Authorization": f"Bearer {TOKEN}",
