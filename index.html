@@ -3,15 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora Live Bartenders</title>
+    <title>Calculadora | Live Bartenders</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
-        .card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
-        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --accent-color: #333;
+            --button-color: #444;
+            --whatsapp-color: #25D366;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); color: var(--text-color); padding: 20px; line-height: 1.6; max-width: 800px; margin: 0 auto; }
+        h1, h2, h3 { color: #fff; }
+        .card { background-color: var(--card-bg); border: 1px solid var(--accent-color); padding: 20px; margin-bottom: 20px; border-radius: 12px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background-color: #2c2c2c; border: 1px solid var(--accent-color); color: white; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background-color: var(--button-color); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        button:hover { background-color: #555; }
+        #total { font-size: 1.2em; font-weight: bold; color: #fff; }
     </style>
 </head>
 <body>
-    <h1>Calculadora de Eventos - Live Bartenders</h1>
+    <h1>Live Bartenders</h1>
     
     <div class="card">
         <h3>Detalhes do Evento</h3>
@@ -22,14 +34,14 @@
     </div>
 
     <div id="calculadora">
-        <!-- Conteúdo será carregado pelo app.js -->
-        <p>Carregando dados das receitas...</p>
+        <!-- Conteúdo carregado pelo app.js -->
+        <p>Carregando cardápio...</p>
     </div>
     
     <div id="orcamento" class="card">
         <h3>Resumo do Orçamento</h3>
         <p id="total">Total: R$ 0.00</p>
-        <button onclick="enviarWhatsApp()" style="background-color: #25D366;">Enviar para WhatsApp</button>
+        <button onclick="enviarWhatsApp()" style="background-color: var(--whatsapp-color);">Enviar para WhatsApp</button>
     </div>
     <script src="app.js"></script>
 </body>
