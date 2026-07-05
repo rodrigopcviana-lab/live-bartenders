@@ -3,21 +3,24 @@
 let cardapio = [];
 let selecao = [];
 
-const CONFIG = {
-    taxaHoraBase: 60,
-    markup: 2.0, // Multiplicador de margem sobre custo total
-    tempoMedioPorDrink: 3.5,
-    horaExtraMultiplier: 1.5,
-    fretes: { "Centro": 50, "Bacuri": 70, "Jucara": 80, "Santa Rita": 90, "Vila Nova": 100, "Parque Anhanguera": 110, "Nova Imperatriz": 120, "Maranhao Novo": 130 }
-};
-
 async function carregarDados() {
     try {
+        console.log("Iniciando fetch de data/receitas.json...");
         const response = await fetch('data/receitas.json');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         cardapio = await response.json();
+        console.log("Cardápio carregado:", cardapio);
+        
         renderizarCardapio();
         popularConvidados();
-    } catch (e) { console.error("Erro ao carregar:", e); }
+    } catch (e) { 
+        console.error("Erro ao carregar cardápio:", e); 
+        document.getElementById('lista-cardapio').innerHTML = '<p style="color:red">Erro ao carregar cardápio. Verifique o console.</p>';
+    }
 }
 
 function popularConvidados() {
@@ -31,6 +34,10 @@ function popularConvidados() {
 function renderizarCardapio() {
     const container = document.getElementById('lista-cardapio');
     container.innerHTML = '';
+    if (!cardapio || cardapio.length === 0) {
+        container.innerHTML = '<p>Nenhum drink disponível.</p>';
+        return;
+    }
     cardapio.forEach((r, i) => {
         const isSelected = selecao.includes(r);
         container.innerHTML += `
@@ -68,23 +75,20 @@ function calcular() {
     const local = document.getElementById('localizacao').value;
 
     const totalDrinks = convidados * consumoMedio;
-    const numSelecao = Math.max(1, selecao.length);
+    const custoInsumosTotal = selecao.length > 0 ? (totalDrinks / selecao.length) * selecao.reduce((sum, item) => sum + (item.CustoReal || 0), 0) : 0;
     
-    // Custo Insumos correto: (TotalDrinks / NumDrinksSelecionados) * CustoRealTotalDosSelecionados
-    const custoInsumosTotal = selecao.length > 0 ? (totalDrinks / numSelecao) * selecao.reduce((sum, item) => sum + (item.CustoReal || 0), 0) : 0;
-    
-    // Mão de Obra
-    const tempoTotalNecessario = totalDrinks * CONFIG.tempoMedioPorDrink;
+    const tempoTotalNecessario = totalDrinks * 3.5; // CONFIG.tempoMedioPorDrink
     const duracaoMin = Math.max(1, duracao) * 60;
     const bartendersNecessarios = Math.ceil(tempoTotalNecessario / duracaoMin);
     
-    let custoMaoObra = bartendersNecessarios * CONFIG.taxaHoraBase * duracao;
-    if (duracao > 4) custoMaoObra += bartendersNecessarios * (CONFIG.taxaHoraBase * CONFIG.horaExtraMultiplier) * (duracao - 4);
+    let custoMaoObra = bartendersNecessarios * 60 * duracao; // CONFIG.taxaHoraBase
+    if (duracao > 4) custoMaoObra += bartendersNecessarios * (60 * 1.5) * (duracao - 4);
     
-    const frete = CONFIG.fretes[local] || 0;
+    const fretes = { "Centro": 50, "Bacuri": 70, "Jucara": 80, "Santa Rita": 90, "Vila Nova": 100, "Parque Anhanguera": 110, "Nova Imperatriz": 120, "Maranhao Novo": 130 };
+    const frete = fretes[local] || 0;
     
     const custoTotal = custoInsumosTotal + custoMaoObra + frete;
-    const precoVenda = custoTotal * CONFIG.markup;
+    const precoVenda = custoTotal * 2.0; // CONFIG.markup
 
     const resumo = `Total a Cobrar: R$ ${precoVenda.toFixed(2)} (Custo: R$${custoTotal.toFixed(0)})`;
     const detalhamento = `Detalhamento:\n- Insumos: R$${custoInsumosTotal.toFixed(0)}\n- Mão de Obra: R$${custoMaoObra.toFixed(0)}\n- Frete: R$${frete.toFixed(0)}`;
