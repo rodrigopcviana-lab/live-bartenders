@@ -62,17 +62,19 @@ function calcular() {
     const local = document.getElementById('localizacao').value;
 
     const totalDrinks = convidados * consumoMedio;
-    const precoMedio = selecao.length > 0 ? selecao.reduce((sum, item) => sum + item.Preco, 0) / selecao.length : 0;
-    const custoInsumos = totalDrinks * (precoMedio * 0.3);
+
+    // Agora usando CustoReal vindo do Notion
+    const custoInsumos = selecao.length > 0 ? selecao.reduce((sum, item) => sum + (item.CustoReal * consumoMedio * convidados), 0) : 0;
+
     const tempoMedioPorDrink = 3.5;
     const tempoTotalNecessario = totalDrinks * tempoMedioPorDrink;
     const duracaoMin = Math.max(1, duracao) * 60;
     const bartendersNecessarios = Math.ceil(tempoTotalNecessario / duracaoMin);
-    
+
     const taxaHoraBase = 50; 
     let custoMaoObra = bartendersNecessarios * taxaHoraBase * duracao;
     if (duracao > 4) custoMaoObra += bartendersNecessarios * (taxaHoraBase * 1.5) * (duracao - 4);
-    
+
     const frete = local ? 150 : 0;
     const total = Math.max(0, custoInsumos + custoMaoObra + frete);
 

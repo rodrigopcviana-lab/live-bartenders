@@ -58,5 +58,19 @@ def sync():
     df_receitas.to_parquet(OUT_DIR / "receitas.parquet")
     print("Receitas sincronizadas.")
 
+    # 3. Sync Linhas de Receita
+    linhas = get_db_data(DB_MAP["linhas"])
+    df_linhas = pd.DataFrame([
+        {
+            "ID": p["id"],
+            "Receita": p["properties"]["Receita"]["relation"][0]["id"] if p["properties"]["Receita"]["relation"] else None,
+            "Ingrediente": p["properties"]["Ingrediente"]["relation"][0]["id"] if p["properties"]["Ingrediente"]["relation"] else None,
+            "Quantidade": p["properties"]["Quantidade"]["number"],
+        }
+        for p in linhas
+    ])
+    df_linhas.to_parquet(OUT_DIR / "linhas.parquet")
+    print("Linhas de receita sincronizadas.")
+
 if __name__ == "__main__":
     sync()

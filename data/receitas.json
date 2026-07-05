@@ -2,21 +2,33 @@
   {
     "ID":"39489fb1-716f-818b-b2ad-c42a2b309261",
     "Nome":"Fitzgerald",
-    "Preco":32
+    "PrecoVenda":32,
+    "Receita":null,
+    "CustoLinha":null,
+    "CustoReal":0.0
   },
   {
     "ID":"39489fb1-716f-813e-869f-f706a9ecbbcb",
     "Nome":"Gin Tonic",
-    "Preco":28
+    "PrecoVenda":28,
+    "Receita":null,
+    "CustoLinha":null,
+    "CustoReal":0.0
   },
   {
     "ID":"39489fb1-716f-81b1-bdd5-c5c4695d37be",
     "Nome":"Moscow Mule",
-    "Preco":30
+    "PrecoVenda":30,
+    "Receita":null,
+    "CustoLinha":null,
+    "CustoReal":0.0
   },
   {
     "ID":"39489fb1-716f-8132-8ccd-ee8916a5a0da",
     "Nome":"Negroni",
-    "Preco":35
+    "PrecoVenda":35,
+    "Receita":"39489fb1-716f-8132-8ccd-ee8916a5a0da",
+    "CustoLinha":7.2,
+    "CustoReal":7.2
   }
 ]
