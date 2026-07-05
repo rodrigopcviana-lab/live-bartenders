@@ -24,10 +24,13 @@ function renderizarCardapio() {
     const container = document.getElementById('lista-cardapio');
     container.innerHTML = '';
     cardapio.forEach((r, i) => {
+        const isSelected = selecao.includes(r);
         container.innerHTML += `
             <div class="menu-item">
                 <span>${r.Nome} (R$ ${r.Preco.toFixed(2)})</span>
-                <button onclick="toggleCardapio(${i})">+</button>
+                <button onclick="toggleCardapio(${i})" style="background-color: ${isSelected ? '#d9534f' : '#444'}">
+                    ${isSelected ? 'Remover' : '+'}
+                </button>
             </div>
         `;
     });
@@ -40,6 +43,7 @@ function toggleCardapio(index) {
     } else {
         selecao.push(item);
     }
+    renderizarCardapio();
     renderizarSelecao();
     calcular();
 }
@@ -50,9 +54,9 @@ function renderizarSelecao() {
 }
 
 function calcular() {
-    const convidados = parseInt(document.getElementById('convidados').value) || 0;
-    const consumoMedio = parseInt(document.getElementById('consumoMedio').value) || 0;
-    const duracao = parseInt(document.getElementById('duracao').value) || 4;
+    const convidados = Math.max(0, parseInt(document.getElementById('convidados').value) || 0);
+    const consumoMedio = Math.max(0, parseInt(document.getElementById('consumoMedio').value) || 0);
+    const duracao = Math.max(0, parseInt(document.getElementById('duracao').value) || 0);
     const local = document.getElementById('localizacao').value;
 
     const totalDrinks = convidados * consumoMedio;
@@ -60,14 +64,15 @@ function calcular() {
     const custoInsumos = totalDrinks * (precoMedio * 0.3);
     const tempoMedioPorDrink = 3.5;
     const tempoTotalNecessario = totalDrinks * tempoMedioPorDrink;
-    const bartendersNecessarios = Math.ceil(tempoTotalNecessario / (duracao * 60));
+    const duracaoMin = Math.max(1, duracao) * 60;
+    const bartendersNecessarios = Math.ceil(tempoTotalNecessario / duracaoMin);
     
     const taxaHoraBase = 50; 
     let custoMaoObra = bartendersNecessarios * taxaHoraBase * duracao;
     if (duracao > 4) custoMaoObra += bartendersNecessarios * (taxaHoraBase * 1.5) * (duracao - 4);
     
     const frete = local ? 150 : 0;
-    const total = custoInsumos + custoMaoObra + frete;
+    const total = Math.max(0, custoInsumos + custoMaoObra + frete);
 
     const resumo = `Total Estimado: R$ ${total.toFixed(2)}`;
     document.getElementById('total').innerText = resumo;
