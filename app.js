@@ -7,7 +7,23 @@ async function carregarDados() {
         const response = await fetch('data/receitas.json');
         cardapio = await response.json();
         renderizarCardapio();
+        popularConvidados();
     } catch (e) { console.error("Erro ao carregar:", e); }
+}
+
+function popularConvidados() {
+    const select = document.getElementById('convidados');
+    let html = '<option value="0">Selecione...</option>';
+    
+    // 0 a 200 de 25 em 25
+    for (let i = 25; i <= 200; i += 25) {
+        html += `<option value="${i}">${i}</option>`;
+    }
+    // 250 a 1000 de 50 em 50
+    for (let i = 250; i <= 1000; i += 50) {
+        html += `<option value="${i}">${i}</option>`;
+    }
+    select.innerHTML = html;
 }
 
 function renderizarCardapio() {
@@ -63,10 +79,6 @@ async function enviarWhatsApp() {
         else alert("Erro ao enviar para WhatsApp.");
     } catch (e) { alert("Erro de conexão com a bridge."); }
 }
-
-// Atualizar o HTML para incluir botão de enviar
-// Adicione o botão no index.html ou aqui via manipulação
-// document.getElementById('orcamento').innerHTML += '<button onclick="enviarWhatsApp()">Enviar para WhatsApp</button>';
 
 ['convidados', 'consumoMedio', 'duracao', 'localizacao'].forEach(id => {
     document.getElementById(id).addEventListener('input', calcular);
