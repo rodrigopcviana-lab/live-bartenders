@@ -29,6 +29,7 @@
         }
 
         * { box-sizing: border-box; }
+        [hidden] { display: none !important; }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -252,6 +253,65 @@
         }
         .selected-list li:last-child { border-bottom: none; }
         .empty-state { color: var(--muted); font-size: 0.88rem; margin: 0; }
+
+        /* ---------- Nav (Calculadora / Histórico) ---------- */
+        .nav-tabs { display: flex; gap: 8px; margin-top: 14px; }
+        .nav-tab {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border-strong);
+            background: transparent;
+            color: var(--muted);
+            font-size: 0.85rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .nav-tab.active { background: var(--gold); color: #1a1500; border-color: var(--gold); }
+        .nav-tab:not(.active):hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+        /* ---------- Galeria de orçamentos ---------- */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+        @media (min-width: 640px) {
+            .gallery-grid { grid-template-columns: 1fr 1fr; }
+        }
+        .quote-item {
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .quote-item-head { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
+        .quote-item-title { font-weight: 700; font-size: 1.02rem; }
+        .quote-item-date { color: var(--muted); font-size: 0.78rem; margin-top: 2px; }
+        .quote-item-total {
+            font-size: 1.3rem; font-weight: 800; color: var(--gold);
+        }
+        .quote-item-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+        .quote-item-drinks { color: var(--muted); font-size: 0.85rem; }
+        .status-select {
+            align-self: flex-start;
+            font-size: 0.78rem;
+            padding: 5px 10px;
+            width: auto;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .status-rascunho { background: rgba(255,255,255,0.08); color: var(--muted); border-color: var(--border-strong); }
+        .status-enviado { background: rgba(37, 211, 102, 0.15); color: #4fdb8a; border-color: rgba(37, 211, 102, 0.35); }
+        .status-fechado { background: var(--warning-bg); color: var(--gold); border-color: rgba(212, 175, 55, 0.4); }
+        .quote-item-actions { display: flex; gap: 8px; margin-top: 4px; }
+        .quote-item-actions .btn { padding: 9px 12px; font-size: 0.85rem; }
+        .btn-danger { background: transparent; color: #ff6b6b; border: 1px solid rgba(217, 83, 79, 0.4); font-weight: 500; }
+        .btn-danger:hover { background: rgba(217, 83, 79, 0.1); }
     </style>
 </head>
 <body>
@@ -259,12 +319,20 @@
     <header>
         <h1 class="brand">Live Bartenders</h1>
         <p id="sync-info" class="sync-info"></p>
+        <nav class="nav-tabs">
+            <button class="nav-tab active" id="tab-calculadora" onclick="mostrarView('calculadora')">Calculadora</button>
+            <button class="nav-tab" id="tab-historico" onclick="mostrarView('historico')">Histórico <span id="historico-count"></span></button>
+        </nav>
     </header>
 
-    <main class="grid">
+    <main class="grid" id="view-calculadora">
         <section class="stack">
             <div class="card">
                 <span class="section-label">Detalhes do evento</span>
+                <div class="field">
+                    <label for="clienteNome">Cliente / evento <span style="opacity:.7">(opcional)</span></label>
+                    <input type="text" id="clienteNome" placeholder="Ex: Casamento Ana &amp; João">
+                </div>
                 <div class="field">
                     <label for="convidados">Convidados</label>
                     <select id="convidados"></select>
@@ -334,6 +402,13 @@
                 </div>
             </div>
         </aside>
+    </main>
+
+    <main id="view-historico" hidden>
+        <div class="card">
+            <span class="section-label">Orçamentos salvos</span>
+            <div id="galeria-lista" class="gallery-grid"></div>
+        </div>
     </main>
 </div>
 

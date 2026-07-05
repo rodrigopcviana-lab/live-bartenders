@@ -48,6 +48,7 @@ async function carregarDados() {
         popularConvidados();
         carregarPresets();
         atualizarSyncInfo(base);
+        atualizarContadorHistorico();
         calcular();
     } catch (e) {
         console.error("Erro ao carregar cardápio:", e);
@@ -153,6 +154,7 @@ function calcularOrcamento() {
     const consumoMedio = Math.max(0, parseInt(document.getElementById('consumoMedio').value) || 0);
     const duracao = Math.max(0, parseInt(document.getElementById('duracao').value) || 0);
     const local = document.getElementById('localizacao').value;
+    const cliente = (document.getElementById('clienteNome')?.value || '').trim();
 
     const totalDrinks = convidados * consumoMedio;
     const selecionados = cardapio.filter(r => selecao.includes(r.ID));
@@ -187,7 +189,7 @@ function calcularOrcamento() {
     const semFicha = selecionados.filter(fichaIncompleta).map(r => r.Nome);
 
     return {
-        convidados, consumoMedio, duracao, local, totalDrinks, bartenders,
+        convidados, consumoMedio, duracao, local, cliente, totalDrinks, bartenders,
         custoInsumos, custoMaoObra, frete, custoTotal, precoCliente, margem,
         selecionados, semFicha,
     };
@@ -311,11 +313,154 @@ function aplicarPreset(nome) {
     calcular();
 }
 
+// ---------- Histórico / Galeria de orçamentos ----------
+const HISTORICO_KEY = 'lb_historico';
+
+function lerHistorico() {
+    try { return JSON.parse(localStorage.getItem(HISTORICO_KEY)) || []; }
+    catch (_) { return []; }
+}
+
+function gravarHistorico(lista) {
+    localStorage.setItem(HISTORICO_KEY, JSON.stringify(lista));
+    atualizarContadorHistorico(lista);
+}
+
+function atualizarContadorHistorico(lista) {
+    const el = document.getElementById('historico-count');
+    if (!el) return;
+    const n = (lista || lerHistorico()).length;
+    el.innerText = n > 0 ? `(${n})` : '';
+}
+
+// Salva um snapshot do orçamento atual no histórico (não é editável depois — é uma "foto" do momento).
+function salvarNoHistorico(status) {
+    const o = calcularOrcamento();
+    const historico = lerHistorico();
+    historico.unshift({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        criadoEm: new Date().toISOString(),
+        cliente: (document.getElementById('clienteNome').value || '').trim(),
+        status: status || 'rascunho',
+        convidados: o.convidados,
+        consumoMedio: o.consumoMedio,
+        duracao: o.duracao,
+        localizacao: o.local,
+        selecao: [...selecao],
+        totais: {
+            custoInsumos: o.custoInsumos,
+            custoMaoObra: o.custoMaoObra,
+            frete: o.frete,
+            custoTotal: o.custoTotal,
+            precoCliente: o.precoCliente,
+            margem: o.margem,
+        },
+        drinksNomes: o.selecionados.map(r => r.Nome),
+    });
+    gravarHistorico(historico);
+    if (document.getElementById('view-historico') && !document.getElementById('view-historico').hidden) {
+        renderizarGaleria();
+    }
+}
+
+function mostrarView(view) {
+    const calc = document.getElementById('view-calculadora');
+    const hist = document.getElementById('view-historico');
+    const tabCalc = document.getElementById('tab-calculadora');
+    const tabHist = document.getElementById('tab-historico');
+    const isHist = view === 'historico';
+    calc.hidden = isHist;
+    hist.hidden = !isHist;
+    tabCalc.classList.toggle('active', !isHist);
+    tabHist.classList.toggle('active', isHist);
+    if (isHist) renderizarGaleria();
+}
+
+function statusLabel(status) {
+    return { rascunho: 'Rascunho', enviado: 'Enviado', fechado: 'Fechado' }[status] || status;
+}
+
+function renderizarGaleria() {
+    const container = document.getElementById('galeria-lista');
+    if (!container) return;
+    const historico = lerHistorico();
+    atualizarContadorHistorico(historico);
+
+    if (historico.length === 0) {
+        container.innerHTML = '<p class="empty-state">Nenhum orçamento salvo ainda. Envie um orçamento pelo WhatsApp para ele aparecer aqui.</p>';
+        return;
+    }
+
+    container.innerHTML = historico.map(h => {
+        const data = new Date(h.criadoEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+        const titulo = h.cliente ? escapeHtml(h.cliente) : `${h.convidados} convidados`;
+        const drinks = h.drinksNomes.length ? h.drinksNomes.map(escapeHtml).join(', ') : 'sem drinks selecionados';
+        return `
+            <div class="quote-item">
+                <div class="quote-item-head">
+                    <div>
+                        <div class="quote-item-title">${titulo}</div>
+                        <div class="quote-item-date">${data}</div>
+                    </div>
+                    <div class="quote-item-total">${formatBRL(h.totais.precoCliente)}</div>
+                </div>
+                <div class="quote-item-chips">
+                    <span class="chip">${h.convidados} convidados</span>
+                    <span class="chip">${h.duracao}h</span>
+                    ${h.localizacao ? `<span class="chip">${escapeHtml(h.localizacao)}</span>` : ''}
+                </div>
+                <div class="quote-item-drinks">${drinks}</div>
+                <select class="status-select status-${h.status}" onchange="mudarStatusHistorico('${h.id}', this.value)">
+                    <option value="rascunho" ${h.status === 'rascunho' ? 'selected' : ''}>Rascunho</option>
+                    <option value="enviado" ${h.status === 'enviado' ? 'selected' : ''}>Enviado</option>
+                    <option value="fechado" ${h.status === 'fechado' ? 'selected' : ''}>Fechado</option>
+                </select>
+                <div class="quote-item-actions">
+                    <button class="btn btn-ghost" onclick="reabrirOrcamento('${h.id}')">Reabrir</button>
+                    <button class="btn btn-danger" onclick="excluirOrcamento('${h.id}')">Excluir</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function mudarStatusHistorico(id, novoStatus) {
+    const historico = lerHistorico();
+    const item = historico.find(h => h.id === id);
+    if (item) item.status = novoStatus;
+    gravarHistorico(historico);
+    renderizarGaleria();
+}
+
+function excluirOrcamento(id) {
+    if (!confirm('Excluir este orçamento do histórico?')) return;
+    const historico = lerHistorico().filter(h => h.id !== id);
+    gravarHistorico(historico);
+    renderizarGaleria();
+}
+
+function reabrirOrcamento(id) {
+    const item = lerHistorico().find(h => h.id === id);
+    if (!item) return;
+    document.getElementById('clienteNome').value = item.cliente || '';
+    document.getElementById('convidados').value = item.convidados;
+    document.getElementById('consumoMedio').value = item.consumoMedio;
+    document.getElementById('duracao').value = item.duracao;
+    document.getElementById('localizacao').value = item.localizacao || '';
+    selecao = Array.isArray(item.selecao) ? [...item.selecao] : [];
+    renderizarCardapio();
+    renderizarSelecao();
+    calcular();
+    mostrarView('calculadora');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // ---------- WhatsApp ----------
 function montarMensagem(o) {
     const linhas = [
         '*Orçamento Live Bartenders*',
         '',
+        o.cliente ? `Cliente/evento: ${o.cliente}` : null,
         `Convidados: ${o.convidados}`,
         `Consumo médio: ${o.consumoMedio} drinks/pessoa`,
         `Duração: ${o.duracao}h`,
@@ -339,6 +484,7 @@ function enviarWhatsApp() {
     const texto = encodeURIComponent(montarMensagem(o));
     const num = CONFIG.WHATSAPP_NUMERO || '';
     window.open(`https://wa.me/${num}?text=${texto}`, '_blank');
+    salvarNoHistorico('enviado');
 }
 
 ['convidados', 'consumoMedio', 'duracao', 'localizacao'].forEach(id => {
