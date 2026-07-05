@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import datetime
 
 # Configuração
 ROOT = Path("/Users/rodrigocoelho62981483511/Desktop/Code 1")
@@ -71,6 +72,11 @@ def sync():
     ])
     df_linhas.to_parquet(OUT_DIR / "linhas.parquet")
     print("Linhas de receita sincronizadas.")
+
+    # Salvar timestamp da última sincronização
+    with open(OUT_DIR / "sync_info.json", "w") as f:
+        json.dump({"last_sync": datetime.now().isoformat()}, f)
+    print("Timestamp de sincronização atualizado.")
 
 if __name__ == "__main__":
     sync()
