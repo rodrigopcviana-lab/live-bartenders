@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora Live Bartenders</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; line-height: 1.6; }
+        .card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 8px; }
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Calculadora de Eventos - Live Bartenders</h1>
+    
+    <div class="card">
+        <h3>Detalhes do Evento</h3>
+        <input type="number" id="convidados" placeholder="Convidados">
+        <input type="number" id="consumoMedio" placeholder="Consumo Médio (drinks/pessoa)">
+        <input type="number" id="duracao" placeholder="Duração (horas)" value="4">
+        <input type="text" id="localizacao" placeholder="Localização (bairro)">
+    </div>
+
+    <div id="calculadora">
+        <!-- Conteúdo será carregado pelo app.js -->
+        <p>Carregando dados das receitas...</p>
+    </div>
+    
+    <div id="orcamento" class="card">
+        <h3>Resumo do Orçamento</h3>
+        <p id="total">Total: R$ 0.00</p>
+        <button onclick="enviarWhatsApp()" style="background-color: #25D366;">Enviar para WhatsApp</button>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

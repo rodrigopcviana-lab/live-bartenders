@@ -1,0 +1,44 @@
+[
+  {
+    "ID":"39489fb1-716f-8157-bf5d-fcb2e9a72e55",
+    "Nome":"Cerveja de Gengibre",
+    "Custo":0.03,
+    "Unidade":"ml"
+  },
+  {
+    "ID":"39489fb1-716f-81d7-876b-d9cde0c0a0d0",
+    "Nome":"Xarope de A\u00e7\u00facar",
+    "Custo":0.01,
+    "Unidade":"ml"
+  },
+  {
+    "ID":"39489fb1-716f-818d-833d-e603805fb4c7",
+    "Nome":"Suco de Lim\u00e3o",
+    "Custo":0.02,
+    "Unidade":"ml"
+  },
+  {
+    "ID":"39489fb1-716f-81e7-8393-f63e7d3938b4",
+    "Nome":"Vermute Tinto",
+    "Custo":0.06,
+    "Unidade":"ml"
+  },
+  {
+    "ID":"39489fb1-716f-81cd-995e-d07fe25ddfae",
+    "Nome":"Campari",
+    "Custo":0.1,
+    "Unidade":"ml"
+  },
+  {
+    "ID":"39489fb1-716f-819d-a67d-d5f86573ce8d",
+    "Nome":"Gin",
+    "Custo":0.08,
+    "Unidade":"ml"
+  },
+  {
+    "ID":"39489fb1-716f-815b-b463-ca8b178d4401",
+    "Nome":"Vodka",
+    "Custo":0.05,
+    "Unidade":"ml"
+  }
+]
