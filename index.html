@@ -72,8 +72,9 @@
             <div id="orcamento" class="card">
                 <h3>Resumo do Orçamento</h3>
                 <p id="total">Total: R$ 0.00</p>
-                <pre id="detalhamento" style="font-size: 0.85em;"></pre>
+                <pre id="detalhamento" style="font-size: 0.85em; white-space: pre-wrap;"></pre>
                 <button onclick="enviarWhatsApp()" style="background-color: var(--whatsapp-color);">Enviar para WhatsApp</button>
+                <select id="presets" onchange="aplicarPreset(this.value)"></select>
                 <button onclick="salvarPreset()">Salvar Preset</button>
             </div>
             <div id="cardapio-selecionado" class="card">

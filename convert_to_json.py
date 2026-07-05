@@ -1,7 +1,10 @@
+import json
+from datetime import datetime, timezone
 import pandas as pd
 from pathlib import Path
 
-DATA_DIR = Path("/Users/rodrigocoelho62981483511/Desktop/live-bartenders/data")
+# Caminho relativo ao próprio repositório (portável / funciona em CI).
+DATA_DIR = Path(__file__).resolve().parent / "data"
 
 def process_data():
     insumos = pd.read_parquet(DATA_DIR / "insumos.parquet")
@@ -29,7 +32,17 @@ def process_data():
     receitas_finais = receitas_finais.rename(columns={'Preco': 'PrecoVenda'})
     
     receitas_finais.to_json(DATA_DIR / "receitas.json", orient="records", indent=2)
+
+    # Timestamp da sincronização (exibido no rodapé do app via #sync-info)
+    (DATA_DIR / "meta.json").write_text(
+        json.dumps({"gerado_em": datetime.now(timezone.utc).isoformat()}, indent=2)
+    )
     print("Dados processados e salvos em receitas.json")
+
+    # Aviso: receitas sem ficha técnica (custo R$0) — precisam de Linhas de Receita no Notion
+    sem_ficha = receitas_finais[receitas_finais["CustoReal"] <= 0]["Nome"].tolist()
+    if sem_ficha:
+        print("AVISO — sem ficha técnica (custo R$0):", ", ".join(sem_ficha))
 
 if __name__ == "__main__":
     process_data()

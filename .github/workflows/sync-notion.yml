@@ -1,0 +1,43 @@
+name: Sync Notion
+
+# Sincroniza os dados do Notion e atualiza data/*.json automaticamente.
+# Requer o secret NOTION_TOKEN configurado no repositório
+# (Settings > Secrets and variables > Actions > New repository secret).
+
+on:
+  workflow_dispatch:        # permite rodar manualmente pela aba Actions
+  schedule:
+    - cron: "0 9 * * *"     # todo dia às 09:00 UTC (06:00 em Imperatriz-MA)
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Sincronizar Notion -> parquet
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: python sync_notion.py
+
+      - name: Converter parquet -> JSON
+        run: python convert_to_json.py
+
+      - name: Commitar dados atualizados
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if git diff --cached --quiet; then
+            echo "Sem mudanças nos dados."
+          else
+            git commit -m "chore: sincroniza dados do Notion [skip ci]"
+            git push
+          fi
