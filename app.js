@@ -25,9 +25,9 @@ function renderizarCardapio() {
     container.innerHTML = '';
     cardapio.forEach((r, i) => {
         container.innerHTML += `
-            <div class="card" style="margin-bottom:10px; padding:10px">
+            <div class="menu-item">
                 <span>${r.Nome} (R$ ${r.Preco.toFixed(2)})</span>
-                <button onclick="toggleCardapio(${i})" style="width: auto; padding: 5px 10px;">+</button>
+                <button onclick="toggleCardapio(${i})">+</button>
             </div>
         `;
     });
