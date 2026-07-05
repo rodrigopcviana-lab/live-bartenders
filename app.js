@@ -99,19 +99,21 @@ function renderizarCardapio() {
     const container = document.getElementById('lista-cardapio');
     container.innerHTML = '';
     if (!cardapio || cardapio.length === 0) {
-        container.innerHTML = '<p>Nenhum drink disponível.</p>';
+        container.innerHTML = '<p class="empty-state">Nenhum drink disponível.</p>';
         return;
     }
     cardapio.forEach((r) => {
         const isSelected = selecao.includes(r.ID);
         const alerta = fichaIncompleta(r)
-            ? '<span class="cat-tag" style="background:#7a5c00" title="Sem ficha técnica no Notion — custo tratado como R$0">⚠ ficha incompleta</span>'
+            ? '<span class="tag" title="Sem ficha técnica no Notion — custo tratado como R$0">⚠ ficha incompleta</span>'
             : '';
+        const preco = r.PrecoVenda ? `<span class="price">${formatBRL(r.PrecoVenda)}</span>` : '';
         container.innerHTML += `
-            <div class="menu-item">
-                <span>${escapeHtml(r.Nome)} ${alerta}</span>
-                <button onclick="toggleCardapio('${r.ID}')" style="background-color: ${isSelected ? '#d9534f' : '#444'}">
-                    ${isSelected ? 'Remover' : '+'}
+            <div class="menu-item${isSelected ? ' selected' : ''}">
+                <span class="name">${escapeHtml(r.Nome)} ${preco} ${alerta}</span>
+                <button class="icon-btn${isSelected ? ' remove' : ''}" onclick="toggleCardapio('${r.ID}')"
+                        aria-label="${isSelected ? 'Remover' : 'Adicionar'} ${escapeHtml(r.Nome)}">
+                    ${isSelected ? '−' : '+'}
                 </button>
             </div>
         `;
@@ -132,8 +134,12 @@ function toggleCardapio(id) {
 function renderizarSelecao() {
     const lista = document.getElementById('lista-selecionada');
     const selecionados = cardapio.filter(r => selecao.includes(r.ID));
+    if (selecionados.length === 0) {
+        lista.innerHTML = '<li class="empty-state">Nenhum drink selecionado ainda.</li>';
+        return;
+    }
     lista.innerHTML = selecionados
-        .map(r => `<li>${escapeHtml(r.Nome)}${fichaIncompleta(r) ? ' ⚠' : ''}</li>`)
+        .map(r => `<li>${escapeHtml(r.Nome)}${fichaIncompleta(r) ? ' <span class="tag">⚠</span>' : ''}</li>`)
         .join('');
 }
 
@@ -190,22 +196,36 @@ function calcularOrcamento() {
 function calcular() {
     const o = calcularOrcamento();
 
-    document.getElementById('total').innerText = `Total a Cobrar: ${formatBRL(o.precoCliente)}`;
+    document.getElementById('total').innerText = formatBRL(o.precoCliente);
 
-    const avisoFicha = o.semFicha.length
-        ? `\n\n⚠ Sem ficha técnica (custo R$0): ${o.semFicha.join(', ')}`
-        : '';
-    const detalhamento =
-        `Drinks estimados: ${o.totalDrinks}  |  Bartenders: ${o.bartenders}\n` +
-        `- Insumos: ${formatBRL(o.custoInsumos)}\n` +
-        `- Mão de obra: ${formatBRL(o.custoMaoObra)}\n` +
-        `- Frete${o.local ? ' (' + o.local + ')' : ''}: ${formatBRL(o.frete)}\n` +
-        `= Custo total: ${formatBRL(o.custoTotal)}\n` +
-        `Margem (${CONFIG.MARKUP}x): ${formatBRL(o.margem)}` +
-        avisoFicha;
+    const chipD = document.getElementById('chip-drinks');
+    const chipB = document.getElementById('chip-bartenders');
+    if (chipD) chipD.innerText = `${o.totalDrinks} drinks`;
+    if (chipB) chipB.innerText = `${o.bartenders} bartender${o.bartenders === 1 ? '' : 's'}`;
 
+    const line = (label, val, cls = '') =>
+        `<div class="line ${cls}"><span>${label}</span><span>${formatBRL(val)}</span></div>`;
     const elDet = document.getElementById('detalhamento');
-    if (elDet) elDet.innerText = detalhamento;
+    if (elDet) {
+        elDet.innerHTML =
+            line('Insumos', o.custoInsumos) +
+            line('Mão de obra', o.custoMaoObra) +
+            line(`Frete${o.local ? ' (' + escapeHtml(o.local) + ')' : ''}`, o.frete) +
+            line('Custo total', o.custoTotal, 'divider strong') +
+            line(`Margem (${CONFIG.MARKUP}x)`, o.margem, 'margin');
+    }
+
+    const aviso = document.getElementById('aviso-ficha');
+    if (aviso) {
+        if (o.semFicha.length) {
+            aviso.hidden = false;
+            aviso.innerHTML =
+                `⚠ Sem ficha técnica (custo R$0): ${o.semFicha.map(escapeHtml).join(', ')}. ` +
+                `O custo real está subestimado.`;
+        } else {
+            aviso.hidden = true;
+        }
+    }
 
     renderChart(o);
     return o;
@@ -230,7 +250,15 @@ function renderChart(o) {
             type: 'doughnut',
             data,
             options: {
-                plugins: { legend: { labels: { color: '#e0e0e0' } } },
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '62%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#c9c9cf', padding: 12, boxWidth: 12, font: { size: 11 } },
+                    },
+                },
             },
         });
     }
